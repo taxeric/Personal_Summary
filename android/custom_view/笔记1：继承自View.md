@@ -1,0 +1,136 @@
+
+# 从基础开始：画一个圆
+
+新建类，继承自View，在构造方法中初始化画笔
+```java
+    public DrawView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        init();
+    }
+    ...
+    private void init(){
+        paint = new Paint();
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(Color.RED);
+    }
+```
+
+重写`onDraw`方法
+```java
+    @Override
+    protected void onDraw(Canvas canvas) {
+        int width = getWidth();
+        int height = getHeight();
+        int radius = Math.min(width, height) / 2;
+        canvas.drawCircle((float) width /2, (float) height / 2, radius, paint);
+    }
+```
+这里写的很清楚了，getWidth()获取控件的宽度，getHeight()获取控件高度，取两者较小值作为直径，然后画圆即可。此外，由于是继承自View，`onDraw`方法是空实现，所以可以把super.onDraw()删掉
+
+在xml文件中定义该控件，将该控件的宽度和高度写为固定值
+```xml
+    <com.eric.customview.DrawView
+        android:background="#000000"
+        android:layout_width="300dp"
+        android:layout_height="300dp" />
+```
+可以看到效果
+
+# 问题来了
+将宽度和高度设置为`warp_content`，重新编译后发现宽度和高度充满整个屏幕，这显然不是想实现的效果。**莫慌**
+
+为什么TextView就可以做到恰好包括文本？通过源码可知，该效果与测量模式有关：
+
+- 如果测量模式是`MeasureSpec.EXACTLY`，则width = 系统测量值
+- 如果测量模式是`MeasureSpec.AT_MOST`，则width = Math.min(系统测量值，字体占的宽度)
+
+这里先不看测量模式是什么东西，先将代码修改一下，实现想要的效果
+
+在该类中重写`onMeasure`方法。
+```java
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+```
+该方法意为：测量，使用如下
+
+1.获取测量值和测量模式
+```java
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        //获取宽度测量值和测量模式
+        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+        //获取高度测量值和测量模式
+        int heightSize = MeasureSpec.getSize(heightMeasureSpec);
+        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+    }
+```
+2.为控件设定属性
+```java
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        ...
+        if (widthMode == MeasureSpec.AT_MOST && heightMode == MeasureSpec.AT_MOST){
+            setMeasuredDimension(200, 200);
+        }else if (widthMode == MeasureSpec.AT_MOST){
+            setMeasuredDimension(200, heightSize);
+        }else if (heightMode == MeasureSpec.AT_MOST){
+            setMeasuredDimension(widthSize, 200);
+        }
+    }
+```
+这里的200单位为像素。重新编译即可看到效果
+
+# 问题又来了
+将该控件宽度和高度修改为`match_parent`，设定padding值，重新编译后发现padding无效！！！**莫慌**，这是因为在onDraw过程中没有对padding处理。对onDraw方法修改如下
+```java
+    @Override
+    protected void onDraw(Canvas canvas) {
+        int width = getWidth() - getPaddingLeft() - getPaddingRight();
+        int height = getHeight() - getPaddingTop() - getPaddingBottom();
+        int radius = Math.min(width, height) / 2;
+        canvas.drawCircle((float) width / 2 + getPaddingLeft(), (float) height / 2 + getPaddingTop(), radius, paint);
+    }
+```
+emmm，还能接受，基本可以理解。重新编译效果正常了
+
+# 自定义属性
+一个牛13的控件肯定是可以通过外部自定义属性的
+
+1.在`res-values`目录下新建`attrs.xml`文件，编写如下（如果有该文件就直接写就行）：
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    ...
+    <!--样式名字-->
+    <declare-styleable name="DrawView">
+        <!--圆的颜色  值为color型-->
+        <attr name="circleColor" format="color"/>
+        <!--圆的模式  值为enum型-->
+        <attr name="circleMode">
+            <enum name="fill" value="0"/>
+            <enum name="stroke" value="1"/>
+        </attr>
+    </declare-styleable>
+</resources>
+```
+2.修改init代码，如下
+```java
+    private void init(Context context, AttributeSet attributeSet){
+
+        TypedArray typedArray = context.obtainStyledAttributes(attributeSet, R.styleable.DrawView);
+        int color = typedArray.getColor(R.styleable.DrawView_circleColor, Color.RED);
+        int mode = typedArray.getInt(R.styleable.DrawView_circleMode, 0);
+        typedArray.recycle();
+
+        paint = new Paint();
+        paint.setStyle(mode == 0 ? Paint.Style.FILL : Paint.Style.STROKE);
+        paint.setColor(color);
+    }
+```
+然后就没有然后了，代码也是中规中矩
+
+OK，这篇就到这里
