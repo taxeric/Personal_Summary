@@ -1,1 +1,11 @@
-
+# 继承自View
+画一个圆
+```java
+    @Override
+    protected void onDraw(Canvas canvas) {
+        int width = getWidth();
+        int height = getHeight();
+        int radius = Math.min(width, height);
+        canvas.drawCircle((float) width /2, (float) height / 2, radius, paint);
+    }
+```
