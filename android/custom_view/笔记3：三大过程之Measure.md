@@ -91,6 +91,8 @@ public static int getChildMeasureSpec(int spec, int padding, int childDimension)
 
 ![image](https://upload-images.jianshu.io/upload_images/944365-6088d2d291bbae09.png?imageMogr2/auto-orient/strip|imageView2/2/w/660/format/webp)
 
+一般情况下，控件的建议尺寸和实际尺寸一致
+
 # ViewGroup的Measure
 ViewGroup继承子View，是一个抽象类，内部提供三个方法用于测量子控件：`measureChildren`，`measureChild`，`measureChildWithMargins`。但阅读源码发现ViewGroup并未
 重写onMeasure方法，这是由于不同容器摆放位置不同，比如LinearLayout和RelativeLayout，这将导致测量的方式会有差异。如果我们自定义ViewGroup那就必须重写onMeasure方法测量
@@ -100,6 +102,9 @@ ViewGroup继承子View，是一个抽象类，内部提供三个方法用于测�
 这两个内部类就是ViewGroup的布局参数类。
 
 自定义ViewGroup的Measure步骤基本如下
+
 1.遍历测量子控件
+
 2.合并子控件的尺寸，最终得到该自定义ViewGroup的测量值
+
 3.调用`setMeasureDimension`方法存储测量值
