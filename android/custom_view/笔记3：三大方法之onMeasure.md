@@ -87,5 +87,6 @@ public static int getChildMeasureSpec(int spec, int padding, int childDimension)
 ![image](https://img-blog.csdnimg.cn/20200727143647717.png)
 
 下面的是别人的总结
+
 ![image](https://upload-images.jianshu.io/upload_images/944365-6088d2d291bbae09.png?imageMogr2/auto-orient/strip|imageView2/2/w/660/format/webp)
 
