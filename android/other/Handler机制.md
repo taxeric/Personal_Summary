@@ -83,3 +83,10 @@ handler.post(new Runnable() {
     }
 });
 ```
+# 工作流程
+0. 程序启动
+1. 主线程创建`Looper、MessageQueue、Handler`。这三者皆属于主线程，创建消息队列后，Looper自动进入消息循环，Handler绑定了主线程的Looper和消息队列
+2. 工作线程通过`Handler`发送`Message`到`MessageQueue`。消息内容即为该工作线程想对UI进行的操作
+3. Looper循环，将`Message`取出（消息出队），然后Looper将取出的`Message`发送给创建该消息的`Handler`
+4. Handler接收Looper发送过来的`Message`，根据该Message进行UI操作
+
