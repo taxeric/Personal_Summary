@@ -36,8 +36,8 @@
   - public void dispatchMessage(Message msg)
   - public final boolean post(Runnable r)
 - MessageQueue
-  - boolean enqueueMessage(Message msg, long when)
-  - Message next()
+  - boolean enqueueMessage(Message msg, long when)//插入Message
+  - Message next()//读取Message，该操作同时会伴随删除操作，该方法是无限循环的方法，如果队列中没有消息则会一直阻塞
 - Looper
   - public static void prepare()
   - public static void loop()
@@ -90,3 +90,5 @@ handler.post(new Runnable() {
 3. Looper循环，将`Message`取出（消息出队），然后Looper将取出的`Message`发送给创建该消息的`Handler`
 4. Handler接收Looper发送过来的`Message`，根据该Message进行UI操作
 
+Handler创建时候会采用当前线程的Looper来构造消息循环系统，需要注意的是，线程默认是没有Looper的，如果在一个子线程中与另一个子线程通信直接使用Looper会报错，这时候
+就需要为线程创建Handler，默认的UI线程(ActivityThread)在被创建的时候就会初始化Looper，这也是在主线程中默认可以使用Handler的原因
