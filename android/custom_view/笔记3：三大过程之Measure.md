@@ -48,7 +48,7 @@ public static int getDefaultSize(int size, int measureSpec) {
 从getDefaultSize方法可以看出，specSize值来自MeasureSpec.getSize(measureSpec)，故此问题在于子控件的specSize值是多少
 
 ## Answer
-由笔记2知道，子控件的MeasureSpec值是根据子控件的布局参数（LayoutParams）和父容器的MeasureSpec值计算得来。在ViewGroup类中，有一个`getChildMeasureSpec`方法，该方法用于获取子控件的MeasureSpec值，简要代码如下
+这个问题就要看看ViewGroup类了。在ViewGroup类中，有一个`getChildMeasureSpec`方法，该方法用于获取子控件的MeasureSpec值，简要代码如下
 ```java
 //这里的spec为父ViewGroup的MeasureSpec值
 public static int getChildMeasureSpec(int spec, int padding, int childDimension) {
@@ -83,7 +83,7 @@ public static int getChildMeasureSpec(int spec, int padding, int childDimension)
     return MeasureSpec.makeMeasureSpec(resultSize, resultMode);
 }
 ```
-在笔记1中，父控件(容器)为LinearLayout，其布局参数为match_parent。至此，就能解释为什么当子控件布局为warp_content时，最终显示与match_parent效果一致了。最后将该逻辑总结如下
+从这个方法中可以得知：子控件的specMode和specSize值不仅由自身的LayoutParams决定，也由父控件的MeasureSpec决定。在笔记1中，父控件(容器)为LinearLayout，其布局参数为match_parent。至此，就能解释为什么当子控件布局为warp_content时，最终显示与match_parent效果一致了。最后将该逻辑总结如下
 
 ![image](https://img-blog.csdnimg.cn/20200727143647717.png)
 
