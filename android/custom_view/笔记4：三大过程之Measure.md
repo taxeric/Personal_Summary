@@ -93,6 +93,11 @@ public static int getChildMeasureSpec(int spec, int padding, int childDimension)
 
 一般情况下，控件的建议尺寸和实际尺寸一致
 
+## Question
+问题来了，顶层View的MeasureSpec是由谁决定？
+## Answer
+在Android中，所有视图（Activity、Dialog等）都是`Window`，由笔记3可知，DecorVieiw是Activity的根布局，传递给DecorView的MeasureSpec是系统根据Activity或Dialog的Theme来确定的，也就是说，最初的MEasureSpec是直接根据Window的属性构建的，一般对于Activity来说，根MeasureSpec是EXACTLY+屏幕尺寸，对于Dialog来说，如果不做特殊设定会采用AT_MOST+屏幕尺寸
+
 # ViewGroup的Measure
 ViewGroup继承子View，是一个抽象类，内部提供三个方法用于测量子控件：`measureChildren`，`measureChild`，`measureChildWithMargins`。但阅读源码发现ViewGroup并未
 重写onMeasure方法，这是由于不同容器摆放位置不同，比如LinearLayout和RelativeLayout，这将导致测量的方式会有差异。如果我们自定义ViewGroup那就必须重写onMeasure方法测量
