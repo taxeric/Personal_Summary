@@ -34,7 +34,7 @@ protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
             getDefaultSize(getSuggestedMinimumHeight(), heightMeasureSpec));
 }
 ```
-可以看到调用了直接用`setMeasureDimension`保存了值，俩值都是来自`getDefaultSize`方法。看名字就知道是获取默认值的。
+可以看到直接用`setMeasureDimension`保存了值，俩值都是来自`getDefaultSize`方法。看名字就知道是获取默认值的。
 
 PS：着重强调————两个参数：widthMeasureSpec、heightMeasureSpec，指的是`父控件传递给当前子控件的一个建议值，即想把当前子控件宽高设为该参数值`，**不是**父控件的宽高**也不是**子控件的宽高，实际尺寸还是得看最后你保存的是多少（关于这里可以看源码）
 
