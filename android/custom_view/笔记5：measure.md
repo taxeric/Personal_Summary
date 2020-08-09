@@ -56,10 +56,10 @@ public static int getDefaultSize(int size, int measureSpec) {
 ```
 这里可以看出，当未重写`onMeasure`方法(或重写了该方法但在方法内没有调用`setMeasuredDimension`方法)时，`AT_MOST`与`EXACTLY`模式的值一致，即**未重写onMeasure方法时，warp_content与match_parent效果一致**
 
-## Question
+### Question
 你可能会想：为什么要这么做？我只是想让父View恰好包裹子View，为什么非得给我整成填满父容器？这不闹么这这这
 
-## Answer
+### Answer
 把这个问题换一下，getDefaultSize的最终结果来自result，而当子View设置wrap_content时，result被赋值为specSize，故该问题是specSize值是多少。
 
 specSize值是`onMeasure`方法的参数，向上找，可以看出`measure`方法中传递了这个参数，再看看`measure`方法被谁调用了，ctrl+点击，可以看到一堆调用，不过仔细看，调用这个方法的类大都像是布局控件，像Toolbar之类的，而其父类是`ViewGroup`，在那一堆里找也能看到在ViewGroup类中也调用了measure方法，所以咱就看看ViewGroup类中这个方法是咋被调用的。点进去发现有俩方法用了measure：
@@ -81,9 +81,9 @@ specSize值是`onMeasure`方法的参数，向上找，可以看出`measure`方�
         child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
     }
 ```
-很清楚了吧，我们能得到三个结论：
+很清楚了吧，可以得到三个结论：
 - 这里的`childWidthMeasureSpec`和`childHeightMeasureSpec`值是由`getChildMeasureSpec`方法得出来的；
-- measure方法是由父View计算子View视图大小时被调用的；
+- measure方法是由父View调用的，用来计算子View视图大小；
 - onMeasure的参数是父View传递给子View的，代表了子View的测量值
 
 PS：这里咱也能得出，onMeasure的俩参数**不是**父控件的宽高**也不是**子控件的实际宽高，因为实际尺寸还是得看最后`setMeasureDimension`保存的是多少
@@ -133,10 +133,10 @@ OK，看到这里就能解释为什么getDefaultSize方法要把MeasureSpec的`A
 
 一般情况下，控件的建议尺寸和实际尺寸一致
 
-## Question
+### Question
 问题又来了，最顶层View的MeasureSpec是由谁决定？
-## Answer
-这里采用别人的一段话：
+### Answer
+这里引用别人的一段话：
 
 在Android中，所有视图（Activity、Dialog等）都是`Window`，由笔记3可知，DecorVieiw是Activity的根布局，传递给DecorView的MeasureSpec是系统根据Activity或Dialog的Theme来确定的，也就是说，最初的MEasureSpec是直接根据Window的属性构建的，一般对于Activity来说，根MeasureSpec是EXACTLY+屏幕尺寸，对于Dialog来说，如果不做特殊设定会采用AT_MOST+屏幕尺寸
 
