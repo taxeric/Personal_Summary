@@ -34,7 +34,9 @@ protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
             getDefaultSize(getSuggestedMinimumHeight(), heightMeasureSpec));
 }
 ```
-这里的两个参数：widthMeasureSpec、heightMeasureSpec，指的是`父控件传递给当前子控件的一个建议值（关于这点可以在上面ViewGroup的measureChild方法看出来），即想把当前子控件宽高设为该参数值`，**不是**父控件的宽高**也不是**子控件的宽高，实际尺寸还是得看最后你保存的是多少
+可以看到调用了直接用`setMeasureDimension`保存了值，俩值都是来自`getDefaultSize`方法。看名字就知道是获取默认值的。
+
+PS：着重强调————两个参数：widthMeasureSpec、heightMeasureSpec，指的是`父控件传递给当前子控件的一个建议值，即想把当前子控件宽高设为该参数值`，**不是**父控件的宽高**也不是**子控件的宽高，实际尺寸还是得看最后你保存的是多少（关于这里可以看源码）
 
 `getDefaultSize`方法如下
 ```java
@@ -57,10 +59,12 @@ public static int getDefaultSize(int size, int measureSpec) {
 这里可以看出，当未重写`onMeasure`方法(或重写了该方法但在方法内没有调用`setMeasuredDimension`方法)时，`AT_MOST`与`EXACTLY`模式的值一致，即**未重写onMeasure方法时，warp_content与match_parent效果一致**
 
 ## Question
-为什么子控件布局设置warp_content也是填充父容器？
+你可能会想：为什么要这么做？我只是想让父View恰好包裹子View，为什么非得给我整成填满父容器？这不闹么这这这
 
 ## Answer
-从getDefaultSize方法可以看出，specSize值来自MeasureSpec.getSize(measureSpec)，故此问题在于子控件的specSize值是多少。specSize值是来自onMeasure方法的参数，向上找，可以看出`measure`方法中传递了这个参数，再看看`measure`方法被谁调用了，ctrl+点击，可以看到一堆调用，不过仔细看，调用这个方法的类大都像是布局控件，像Toolbar之类的，而其父类是`ViewGroup`，往下找也能看到在ViewGroup类中也调用了measure方法，所以看看ViewGroup类中这个方法是咋被调用的。点进去发现调用`measure`方法的有俩：`measureChild()`和`measureChildWithMargins()`，看名字就能才出来是干啥用的，看看measureChild方法
+把这个问题换一下，getDefaultSize的最终结果来自result，而当子View设置wrap_content时，result被赋值为specSize，故该问题是specSize值是多少。
+
+specSize值是`onMeasure`方法的参数，向上找，可以看出`measure`方法中传递了这个参数，再看看`measure`方法被谁调用了，ctrl+点击，可以看到一堆调用，不过仔细看，调用这个方法的类大都像是布局控件，像Toolbar之类的，而其父类是`ViewGroup`，在那一堆里找也能看到在ViewGroup类中也调用了measure方法，所以咱就看看ViewGroup类中这个方法是咋被调用的。点进去发现调用方法的俩：`measureChild()`和`measureChildWithMargins()`，看名字就能才出来是干啥用的，看看measureChild方法
 ```java
     //ViewGroup的方法，可以看到最后调用了子View的measure方法
     protected void measureChild(View child, int parentWidthMeasureSpec,
@@ -75,7 +79,9 @@ public static int getDefaultSize(int size, int measureSpec) {
         child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
     }
 ```
-很清楚了吧，我们能得到两个结论：这里的`childWidthMeasureSpec`和`childHeightMeasureSpec`值是由`getChildMeasureSpec`方法得出来的；measure方法是由父View计算子View视图大小时被调用的
+很清楚了吧，我们能得到两个结论：
+- 这里的`childWidthMeasureSpec`和`childHeightMeasureSpec`值是由`getChildMeasureSpec`方法得出来的；
+- measure方法是由父View计算子View视图大小时被调用的
 
 点进去`getChildMeasureSpec`方法，看得出来....逻辑有点棘手啊，不过仔细看看还是中规中矩的。简要代码如下
 ```java
@@ -101,8 +107,8 @@ public static int getChildMeasureSpec(int spec, int padding, int childDimension)
             resultSize = size;
             resultMode = MeasureSpec.EXACTLY;
         } else if (childDimension == LayoutParams.WRAP_CONTENT) {
-            //如果子View布局为warp_content，则子View最终布局大小为specSize，
-            //即父ViewGroup布局大小，子View最终测量模式为AT_MOST
+            //如果子View布局为warp_content，则子View最终布局大小为父View的specSize，
+            //即ViewGroup布局大小，子View最终测量模式为AT_MOST
             resultSize = size;
             resultMode = MeasureSpec.AT_MOST;
         }
@@ -112,7 +118,7 @@ public static int getChildMeasureSpec(int spec, int padding, int childDimension)
     return MeasureSpec.makeMeasureSpec(resultSize, resultMode);
 }
 ```
-OK，看到这里就能解释为什么当子控件布局为warp_content时，最终显示与match_parent效果一致了。而且咱又得出一结论：子控件的specMode和specSize值不仅由自身的LayoutParams决定，也由父控件的MeasureSpec决定。在笔记1中，父控件(容器)为LinearLayout，其根布局参数为match_parent。最后将该逻辑总结如下
+OK，看到这里就能解释为什么getDefaultSize方法要把MeasureSpec的`AT_MOST`和`EXACTLY`统一处理了，也能理解为啥当子控件布局为warp_content时，最终显示与match_parent效果一致。而且咱又得出一结论：子控件的specMode和specSize值不仅由自身的LayoutParams决定，也由父控件的MeasureSpec决定。在笔记1中，父控件(容器)为LinearLayout，其根布局参数为match_parent。最后将该逻辑总结如下
 
 ![image](https://img-blog.csdnimg.cn/20200727143647717.png)
 
