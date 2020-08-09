@@ -1,19 +1,4 @@
-在布局中，每个View的大小不仅取决于自身，也受父控件影响。`measure`用于View的自我测量，虽然是这么说，不过真正进行自我测量的是方法内部的`onMeasure`方法。`measure`是一个调度方法，会做测量前的预处理操作，`onMeasure`主要就是测量View的大小及模式，举个例子
-```java
-    //ViewGroup中测量子View的方法，可以看到最后调用了子View的measure方法
-    protected void measureChild(View child, int parentWidthMeasureSpec,
-            int parentHeightMeasureSpec) {
-        final LayoutParams lp = child.getLayoutParams();
-
-        final int childWidthMeasureSpec = getChildMeasureSpec(parentWidthMeasureSpec,
-                mPaddingLeft + mPaddingRight, lp.width);
-        final int childHeightMeasureSpec = getChildMeasureSpec(parentHeightMeasureSpec,
-                mPaddingTop + mPaddingBottom, lp.height);
-
-        child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
-    }
-```
-测量过程分两种情况考虑：
+在布局中，每个View的大小不仅取决于自身，也受父控件影响。`measure`用于View的自我测量，虽然是这么说，不过真正进行自我测量的是方法内部的`onMeasure`方法。`measure`是一个调度方法，会做测量前的预处理操作，`onMeasure`主要就是测量View的大小及模式，测量过程咱得分两种情况考虑：
 - 子View就是一个普通的View；
 - 子View是一个ViewGroup。
 
