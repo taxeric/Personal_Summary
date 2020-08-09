@@ -62,7 +62,11 @@ public static int getDefaultSize(int size, int measureSpec) {
 ## Answer
 把这个问题换一下，getDefaultSize的最终结果来自result，而当子View设置wrap_content时，result被赋值为specSize，故该问题是specSize值是多少。
 
-specSize值是`onMeasure`方法的参数，向上找，可以看出`measure`方法中传递了这个参数，再看看`measure`方法被谁调用了，ctrl+点击，可以看到一堆调用，不过仔细看，调用这个方法的类大都像是布局控件，像Toolbar之类的，而其父类是`ViewGroup`，在那一堆里找也能看到在ViewGroup类中也调用了measure方法，所以咱就看看ViewGroup类中这个方法是咋被调用的。点进去发现有俩方法用了measure：`measureChild()`和`measureChildWithMargins()`，看名字就能猜出来是干啥用的，看看measureChild方法
+specSize值是`onMeasure`方法的参数，向上找，可以看出`measure`方法中传递了这个参数，再看看`measure`方法被谁调用了，ctrl+点击，可以看到一堆调用，不过仔细看，调用这个方法的类大都像是布局控件，像Toolbar之类的，而其父类是`ViewGroup`，在那一堆里找也能看到在ViewGroup类中也调用了measure方法，所以咱就看看ViewGroup类中这个方法是咋被调用的。点进去发现有俩方法用了measure：
+- `measureChild()`
+- `measureChildWithMargins()`
+
+看名字就能猜出来是干啥用的，看看measureChild方法
 ```java
     //ViewGroup的方法，可以看到最后调用了子View的measure方法
     protected void measureChild(View child, int parentWidthMeasureSpec,
