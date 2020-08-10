@@ -3,10 +3,7 @@
 看layout的源码
 ```java
     public void layout(int l, int t, int r, int b) {
-        if ((mPrivateFlags3 & PFLAG3_MEASURE_NEEDED_BEFORE_LAYOUT) != 0) {
-            onMeasure(mOldWidthMeasureSpec, mOldHeightMeasureSpec);
-            mPrivateFlags3 &= ~PFLAG3_MEASURE_NEEDED_BEFORE_LAYOUT;
-        }
+        ...
 
         int oldL = mLeft;
         int oldT = mTop;
