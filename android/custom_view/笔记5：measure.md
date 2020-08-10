@@ -1,4 +1,4 @@
-在布局中，每个View的大小不仅取决于自身，也受父控件影响。`measure`用于View的自我测量，虽然是这么说，不过真正进行自我测量的是方法内部的`onMeasure`方法。`measure`是一个调度方法，会做测量前的预处理操作，`onMeasure`主要就是测量View的大小及模式，所以咱着重看onMeasure方法就行。测量过程咱得分两种情况考虑：
+`measure`用于View的自我测量，虽然是这么说，不过真正进行自我测量的是方法内部的`onMeasure`方法。`measure`是一个调度方法，会做测量前的预处理操作，`onMeasure`主要就是测量View的大小及模式，所以咱着重看onMeasure方法就行。测量过程咱得分两种情况考虑：
 - 子View就是一个普通的View；
 - 子View是一个ViewGroup。
 
@@ -82,9 +82,9 @@ specSize值是`onMeasure`方法的参数，向上找，可以看出`measure`方�
     }
 ```
 很清楚了吧，可以得到三个结论：
-- 这里的`childWidthMeasureSpec`和`childHeightMeasureSpec`值是由`getChildMeasureSpec`方法得出来的；
-- measure方法是由父View调用的，用来计算子View视图大小；
-- onMeasure的参数是父View传递给子View的，代表了子View的测量值
+- **这里的`childWidthMeasureSpec`和`childHeightMeasureSpec`值是由`getChildMeasureSpec`方法得出来的；**
+- **measure方法是由父View调用的，用来计算子View视图大小；**
+- **onMeasure的参数是父View传递给子View的，代表了子View的测量值**
 
 PS：这里咱也能得出，onMeasure的俩参数**不是**父控件的宽高**也不是**子控件的实际宽高，因为实际尺寸还是得看最后`setMeasureDimension`保存的是多少
 
@@ -123,7 +123,7 @@ public static int getChildMeasureSpec(int spec, int padding, int childDimension)
     return MeasureSpec.makeMeasureSpec(resultSize, resultMode);
 }
 ```
-OK，看到这里就能解释为什么getDefaultSize方法要把MeasureSpec的`AT_MOST`和`EXACTLY`统一处理了，也能理解为啥当子控件布局为warp_content时，最终显示与match_parent效果一致。而且咱又得出一结论：子控件的specMode和specSize值不仅由自身的LayoutParams决定，也由父控件的MeasureSpec决定。在笔记1中，父控件(容器)为LinearLayout，其根布局参数为match_parent。最后将该逻辑总结如下
+OK，看到这里就能解释为什么getDefaultSize方法要把MeasureSpec的`AT_MOST`和`EXACTLY`统一处理了，也能理解为啥当子控件布局为warp_content时，最终显示与match_parent效果一致。而且咱又得出一结论：**子控件的specMode和specSize值不仅由自身的LayoutParams决定，也由父控件的MeasureSpec决定。**在笔记1中，父控件(容器)为LinearLayout，其根布局参数为match_parent。最后将该逻辑总结如下
 
 ![image](https://img-blog.csdnimg.cn/20200727143647717.png)
 
@@ -141,15 +141,14 @@ OK，看到这里就能解释为什么getDefaultSize方法要把MeasureSpec的`A
 在Android中，所有视图（Activity、Dialog等）都是`Window`，由笔记3可知，DecorVieiw是Activity的根布局，传递给DecorView的MeasureSpec是系统根据Activity或Dialog的Theme来确定的，也就是说，最初的MEasureSpec是直接根据Window的属性构建的，一般对于Activity来说，根MeasureSpec是EXACTLY+屏幕尺寸，对于Dialog来说，如果不做特殊设定会采用AT_MOST+屏幕尺寸
 
 # ViewGroup的onMeasure做什么
-如果子View是一个ViewGroup，那么子View又会调用它的子View的`measure`方法，让它的子View进行自我测量，然后根据它们自己测量的尺寸计算它们的位置，并把值保存下来，再根据这些值计算和保存自己的位置
+如果子View是一个ViewGroup，那么子View又会调用它自身子View的`measure`方法，让它自身的子View进行自我测量，然后根据它们自己测量的尺寸计算它们的位置，并把值保存下来，再根据这些值计算和保存自己的位置
 ViewGroup继承子View，是一个抽象类，内部提供三个方法用于测量子控件：`measureChildren`，`measureChild`，`measureChildWithMargins`。但阅读源码发现ViewGroup并未
-重写onMeasure方法，这是由于不同容器摆放位置不同，比如LinearLayout和RelativeLayout，这将导致测量的方式会有差异。如果我们自定义ViewGroup那就必须重写onMeasure方法测量
+重写onMeasure方法，这是由于不同容器摆放位置不同，比如LinearLayout和RelativeLayout，会导致测量的方式会有差异。如果我们自定义ViewGroup那就必须重写onMeasure方法测量
 子控件的尺寸。
 
-`measureChildWithMargins`和`measureChild`的区别就是父控件支不支持margin属性。在ViewGroup中有两个内部类：`LayoutParams`和`MarginLayoutParams`(后者继承自前者)，
-这两个内部类就是ViewGroup的布局参数类。
+`measureChildWithMargins`和`measureChild`的区别就是父View支不支持margin属性，而`measureChildren`和`measureChild`的区别是前者会跳过VISIABLE=GONE的子View。在ViewGroup中有两个内部类：`LayoutParams`和`MarginLayoutParams`(后者继承自前者)，这两个内部类就是ViewGroup的布局参数类。
 
-综上所述，ViewGroup中measure步骤基本如下
+最后将ViewGroup中measure步骤总结如下
 
 1.遍历子View，调用每个子View的measure，让它们自我测量
 
@@ -157,19 +156,18 @@ ViewGroup继承子View，是一个抽象类，内部提供三个方法用于测�
 
 3.根据子View的尺寸和位置计算自己的尺寸，用`setMeasureDimension`方法保存
 
-看起来还行吧？下面一个个来说一下
-
-## 遍历子View，保存测量值
-注意：这一步是最关键的。上面已经说了，measure方法有俩参数，widthMeasureSpec和heightMeasureSpec，这俩值其实就是父View对子View的尺寸限制。所谓的限制，总结来说**就是上面的表格**，我们只需要调用ViewGroup类中已经写好的方法即可：
-- **measureChildren(int widthMeasureSpec, int heightMeasureSpec)**
-这个方法会**跳过VISIABLE = GONE**的子View
-- **measureChild(View child, int parentWidthMeasureSpec, int parentHeightMeasureSpec)**
-- **measureChildWithMargins(View child, int parentWidthMeasureSpec, int widthUsed, int parentHeightMeasureSpec, int heightUsed)**
+看起来还行吧？大概就是下面写的那样
 ```java
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         //由于是重写ViewGroup来自定义View，所以注释掉之前测量的值
         //super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        
+        //测量完所有的子View后自身应该有多宽，有多高
+        int measureWidth = 0;
+        int measureHeight = 0;
+        
+        //子View的数量
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i ++){
 
@@ -178,7 +176,14 @@ ViewGroup继承子View，是一个抽象类，内部提供三个方法用于测�
 
             //测量并保存子View的尺寸
             measureChild(childView, widthMeasureSpec, heightMeasureSpec);
+            
+            //合并子View尺寸到ViewGroup中
+            measureWidth += childView.getMeasuredWidth();
+            measureHeight += childView.getMeasuredHeight();
         }
+
+        //最后保存自身应该有的宽度和高度
+        setMeasuredDimension(measureWidth, measureHeight);
     }
 ```
 
