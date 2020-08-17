@@ -22,7 +22,7 @@
 
 ### 重写onMeasure和onLayout重新自定义ViewGroup的内部布局
 1. 重写onMeasure计算内部布局
-2. 重写onLayout拜访子View
+2. 重写onLayout摆放子View
 
 # 绘制
 即`draw`方法。在布局过程中，每个子View都存储了自己的尺寸和位置，接下来就按这些属性绘制自身即可
