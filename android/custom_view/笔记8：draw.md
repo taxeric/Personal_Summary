@@ -65,6 +65,6 @@ ViewGroup没有重写draw方法，因此所有的View都是调用子View的draw�
         return child.draw(canvas, this, drawingTime);
     }
 ```
-look，最终也是调用child的draw方法。但是你也会发现，这里的draw和View的draw方法不一样，其实绘制的方法不是只有一个
+look，最终也是调用child的draw方法。但是你也会发现，这里的draw和View的draw方法不一样，其实绘制的方法不是只有一个，其他方法在下没有找到，尴尬....不过**画什么会交给子View自己决定**这个是确定的
 
-
+OK，这篇就到这里
