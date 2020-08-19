@@ -97,7 +97,7 @@ public class CustomView extends AppCompatImageView {
 ```
 效果如图
 
-![添加文字](https://img-blog.csdnimg.cn/20200818212740241.png
+![绘制后的ImageView](https://img-blog.csdnimg.cn/20200818212740241.png)
 
 那有没有想过如果把这些代码写到super.onDraw上面会怎么样？常见的一个场景就是强调色，按照上面的逻辑，会先绘制强调色，然后绘制文本：
 ```java
@@ -119,6 +119,8 @@ public class CustomView extends AppCompatTextView {
     }
 }
 ```
+效果如图：
+![绘制强调色](https://img-blog.csdnimg.cn/20200819110314699.png)
 
 当我们需要在ViewGroup中绘制，比如LinearLayout时，如果将绘制的代码写到super.onDraw()下面，按照上面的逻辑，会先绘制写的代码，然后绘制子View，这并不是我们想要的。怎样才能让LinearLayout的绘制内容在子View上面？只需将绘制的代码写到子View绘制完成后就🉑：
 ```java
@@ -184,7 +186,7 @@ public class CustomView extends LinearLayout {
 ```
 如果我们将绘制代码写到super.onDrawForeground()上面，那么我们绘制的内容就会被前景遮盖，写到下面会覆盖前景。
 
-![总结](http://wx3.sinaimg.cn/large/006tKfTcly1fii5jk7l19j30q70e0di5.jpg)
+![总结](https://img-blog.csdnimg.cn/20200819110155944.png)
 
 # 注意
 以下摘自Hencoder
