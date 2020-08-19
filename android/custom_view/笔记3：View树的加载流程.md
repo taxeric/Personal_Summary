@@ -16,101 +16,91 @@ View布局贯穿在整个程序中，不管是Activity还是Fragment都提供了
         getDelegate().setContentView(layoutResID);
     }
 ```
-getDelegate方法如下
+先不看是怎么实现的，先看看它的父类：Activity里面是怎么写的
 ```java
-    @NonNull
-    public AppCompatDelegate getDelegate() {
-        if (mDelegate == null) {
-            mDelegate = AppCompatDelegate.create(this, this);
-        }
-        return mDelegate;
+    /**
+     * 给activity设置xml布局，把所有顶级视图添加到这个activity
+     */
+    public void setContentView(@LayoutRes int layoutResID) {
+        getWindow().setContentView(layoutResID);
+        initWindowDecorActionBar();
     }
 ```
-看create方法，点进去，发现其内部实现为`AppCompatDelegateImpl`
+不知道什么是**顶级视图**，接着看源码。这个方法调用了一个`getWindow()`方法，点进去
 ```java
-    @NonNull
-    public static AppCompatDelegate create(@NonNull Activity activity,
-            @Nullable AppCompatCallback callback) {
-        return new AppCompatDelegateImpl(activity, callback);
+    public Window getWindow() {
+        return mWindow;
     }
 ```
-在`AppCompatDelegateImpl`这个类中找到`setContentVieww(int resId)`方法，内部实现如下
+就这....看注释也看不出是啥，就先看看Window是啥。点进去可以看到Window是个抽象类
 ```java
-    @Override
-    public void setContentView(int resId) {
-        ensureSubDecor();
-        ViewGroup contentParent = mSubDecor.findViewById(android.R.id.content);
-        contentParent.removeAllViews();
-        LayoutInflater.from(mContext).inflate(resId, contentParent);
-        mAppCompatWindowCallback.getWrapped().onContentChanged();
-    }
+public abstract class Window {
+    ...
+}
 ```
-看到个很眼熟的东西：LayoutInflater。看实现
+注释：用于**顶级窗口**外观和行为策略的基类。该类的实例应被作为顶级视图，添加到WindowManager，它提供标准的UI策略，例如背景、标题等。它只有一个实现类：PhoneWindow
+
+额..那就能得出getWindow获取到的是`PhoneWindow`的`setContentView`方法。跳到PhoneWindow，结果发现这个类爆红，推测可能是有hide注解的所以看不了，就看看是别人怎么写的：
+（以下全部是别人的总结）
 ```java
-    public View inflate(@LayoutRes int resource, @Nullable ViewGroup root, boolean attachToRoot) {
-        final Resources res = getContext().getResources();
-        if (DEBUG) {
-            Log.d(TAG, "INFLATING from resource: \"" + res.getResourceName(resource) + "\" ("
-                  + Integer.toHexString(resource) + ")");
+  @Override
+  public void setContentView(int layoutResID) {
+      // Note: FEATURE_CONTENT_TRANSITIONS may be set in the process of installing the window
+      // decor, when theme attributes and the like are crystalized. Do not check the feature
+      // before this happens.
+      if (mContentParent == null) {
+          installDecor();
+      } else if (!hasFeature(FEATURE_CONTENT_TRANSITIONS)) {
+          mContentParent.removeAllViews();
+      }
+      if (hasFeature(FEATURE_CONTENT_TRANSITIONS)) {
+          final Scene newScene = Scene.getSceneForLayout(mContentParent, layoutResID,
+                  getContext());
+          transitionTo(newScene);
+      } else {
+          mLayoutInflater.inflate(layoutResID, mContentParent);
+      }
+      mContentParent.requestApplyInsets();
+      final Callback cb = getCallback();
+      if (cb != null && !isDestroyed()) {
+          cb.onContentChanged();
+      }
+      mContentParentExplicitlySet = true;
+  }
+```
+第一个判断推测是mContentParent初始化的逻辑，下面的判断是把id为layoutResId的资源加载到mContentParent里，OK先看到这里，看看mContentParent是个啥：
+```java
+    // This is the view in which the window contents are placed. It is either
+    // mDecor itself, or a child of mDecor where the contents go.
+    ViewGroup mContentParent;
+```
+注释：放置Window的View，可能是DecorView，也可能是DecorView的子View
+
+又出来个`DecorView`的概念，既然在上面的setContentView方法中有个`installDecor`方法，那就点进去看看这个方法干了啥：
+```java
+    private void installDecor() {
+        mForceDecorInstall = false;
+        if (mDecor == null) {
+            mDecor = generateDecor(-1);
+            mDecor.setDescendantFocusability(ViewGroup.FOCUS_AFTER_DESCENDANTS);
+            mDecor.setIsRootNamespace(true);
+            if (!mInvalidatePanelMenuPosted && mInvalidatePanelMenuFeatures != 0) {
+                mDecor.postOnAnimation(mInvalidatePanelMenuRunnable);
+            }
+        } else {
+            mDecor.setWindow(this);
         }
+        if (mContentParent == null) {
+            mContentParent = generateLayout(mDecor);
 
-        View view = tryInflatePrecompiled(resource, res, root, attachToRoot);
-        if (view != null) {
-            return view;
-        }
-        XmlResourceParser parser = res.getLayout(resource);
-        try {
-            return inflate(parser, root, attachToRoot);
-        } finally {
-            parser.close();
-        }
-    }
-    
-    public View inflate(XmlPullParser parser, @Nullable ViewGroup root, boolean attachToRoot) {
-        synchronized (mConstructorArgs) {
-            Trace.traceBegin(Trace.TRACE_TAG_VIEW, "inflate");
-
-            final Context inflaterContext = mContext;
-            final AttributeSet attrs = Xml.asAttributeSet(parser);
-            Context lastContext = (Context) mConstructorArgs[0];
-            mConstructorArgs[0] = inflaterContext;
-            View result = root;
-
-            try {
-                advanceToRootNode(parser);
-                final String name = parser.getName();
-                ...
-
-                if (TAG_MERGE.equals(name)) {
-                    if (root == null || !attachToRoot) {
-                        throw new InflateException("<merge /> can be used only with a valid "
-                                + "ViewGroup root and attachToRoot=true");
-                    }
-
-                    rInflate(parser, root, inflaterContext, attrs, false);
-                } else {
-                    // Temp is the root view that was found in the xml
-                    final View temp = createViewFromTag(root, name, inflaterContext, attrs);
-                    ViewGroup.LayoutParams params = null;
-                    if (root != null) {
-                        ...
-                        // Create layout params that match root, if supplied
-                        //创建布局参数给根布局
-                        params = root.generateLayoutParams(attrs);
-                        if (!attachToRoot) {
-                            temp.setLayoutParams(params);
-                        }
-                    }
-                    ...
-                    // 填充所有子View
-                    rInflateChildren(parser, temp, attrs, true);
-                    ...
-                }
-            } ...
-
-            return result;
+        ///...  省略若干代码
         }
     }
 ```
-可以看到调用了`rInflateChildren`方法来填充子View，即完成子View初始化。
+可以看到在mContent初始化前，一个叫`mDecor`的东西初始化了。看看这是个啥：
+```java
+    // This is the top-level view of the window, containing the window decor.
+    private DecorView mDecor;
+```
+注释：这是Window的顶层视图，包含Window的装饰
 
