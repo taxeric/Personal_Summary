@@ -104,3 +104,39 @@ public abstract class Window {
 ```
 注释：这是Window的顶层视图，包含Window的装饰
 
+看看DecorView代码
+```java
+public class DecorView extends FrameLayout implements RootViewSurfaceTaker, WindowCallbacks {
+  //... 省略很多很多代码
+}
+```
+可以得出：DecorView是一个FrameLayout，是最顶层的View。包含Window（顶级窗口）的装饰（比如大小等属性）会体现在这个View上。
+
+接着回到PhoneWindow，看看`mDecor`是怎么初始化的
+```java
+   protected DecorView generateDecor(int featureId) {
+      // System process doesn't have application context and in that case we need to directly use
+      // the context we have. Otherwise we want the application context, so we don't cling to the
+      // activity.
+      Context context;
+      if (mUseDecorContext) {
+          Context applicationContext = getContext().getApplicationContext();
+          if (applicationContext == null) {
+              context = getContext();
+          } else {
+              context = new DecorContext(applicationContext, getContext().getResources());
+              // 设置主题
+              if (mTheme != -1) {
+                  context.setTheme(mTheme);
+              }
+          }
+      } else {
+          context = getContext();
+      }
+      // new 一个DecorVIew
+      return new DecorView(context, featureId, this, getAttributes());
+  }
+```
+
+
+
