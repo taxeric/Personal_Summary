@@ -6,10 +6,11 @@ dependencies {
     
     def room_version = "2.2.5"
     implementation "androidx.room:room-runtime:$room_version"
-    //kotlin下使用
+    
+    //如果你是kotlin就使用
     kapt "androidx.room:room-compiler:$room_version"
-    //java下使用
-    //annotationProcessor "androidx.room:room-compiler:$room_version"
+    //如果你是java就使用
+    annotationProcessor "androidx.room:room-compiler:$room_version"
     
     //可选-Kotlin扩展和协程对Room的支持
     implementation "androidx.room:room-ktx:$room_version"
@@ -41,7 +42,7 @@ dependencies {
 - RoomDatabase 抽象类，处理数据库初始化及Dao对象生成相关操作
 - Room 普通类，采用Builder模式，用于生成具体的RoomDatabase子类对象
 # 简单使用
-建实体类
+### 建实体类
 ```java
 @Entity(tableName = "tb_user")
 public class User {
@@ -94,10 +95,10 @@ public class User {
 }
 ```
 PS：
-1. 一定要有get、set方法，否则会报错，起码我报错了
-2. 除空参构造外的其他构造都应用@Ignore标识
+1. 一定要有get、set方法，否则会报错，起码我报错了（:D）
+2. 除空参构造外的其他构造都应使用@Ignore标识
 
-建Dao类
+### 建Dao类
 ```java
 @Dao
 public interface UserDao {
@@ -138,7 +139,7 @@ public interface UserDao {
 }
 ```
 
-使用Database
+### 使用Database
 ```java
 @Database(entities = {User.class}, version = 1)
 public abstract class AppDatabase extends RoomDatabase {
@@ -167,7 +168,7 @@ PS：
 2. 应该使用单例来创建RoomDatabase，因为实例化应该RoomDatabase是非常消耗资源的
 3. allowMainThreadQueries方法作用是禁用主线程检查，如果没有配置该方法，则**必须在子线程进行数据操作**
 
-使用
+### Activity使用
 ```java
 public class MainActivity extends AppCompatActivity {
 
