@@ -132,10 +132,6 @@ class HomeFragment: BaseFragment(), RvListener.OnItemClickListener, HomeRvAdapte
         }, 1000)
     }
 
-    interface LoadMoreCompleteListener{
-        fun loadMoreComplete(holder: HomeRvAdapter.FootHolder)
-    }
-
     override fun loadComplete(): String = "点击加载更多"
 
     override fun loading(): String = "加载中..."
