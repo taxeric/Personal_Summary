@@ -1,5 +1,5 @@
 假设接口数据一共有10条（不包括顶边和底边），项目需要显示top和foot，可以这么写：
-1. 在加载网络数据前先add一条空数据
+1. 在首次加载数据前先add一条空数据用于显示top
 2. adapter的`getItemCount`方法返回集合.size + 1
 3. adapter的`getItemViewType`方法按需返回：position=0返回顶边，=size返回底边，否则返回正常接口的数据
 4. adapter的`onCreateViewHolder`方法按需返回viewHolder
@@ -85,7 +85,7 @@ class HomeRvAdapter constructor(
 }
 ```
 
-activity简要代码如下
+fragment简要代码如下
 ```java
 class HomeFragment: BaseFragment(), RvListener.OnItemClickListener, HomeRvAdapter.SetFootViewText {
 
@@ -137,3 +137,4 @@ class HomeFragment: BaseFragment(), RvListener.OnItemClickListener, HomeRvAdapte
     override fun loading(): String = "加载中..."
 }
 ```
+
