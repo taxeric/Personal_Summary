@@ -13,12 +13,13 @@ adapter简要代码如下
 ```java
 class HomeRvAdapter constructor(
     private val context: Context,
-    private val mutableList: MutableList<String>
+    private val mutableList: MutableList<String>,
+    private val setFootViewText: SetFootViewText
 ): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private var listener: RvOnItemClickListener ?= null
+    private var listener: RvListener.OnItemClickListener ?= null
 
-    fun setItemClickListener(listener: RvOnItemClickListener){
+    fun setItemClickListener(listener: RvListener.OnItemClickListener){
         this.listener = listener
     }
 
@@ -54,9 +55,10 @@ class HomeRvAdapter constructor(
                 holder.itemView.test_id.text = mutableList[position]
             }
         } else if (holder is FootHolder){
+            holder.itemView.click_load_more.text = setFootViewText.loadComplete()
             holder.itemView.setOnClickListener{
                 if (listener != null){
-                    holder.itemView.click_load_more.text = "加载中..."
+                    holder.itemView.click_load_more.text = setFootViewText.loading()
                     listener!!.onItemClick(position)
                 }
             }
@@ -74,15 +76,22 @@ class HomeRvAdapter constructor(
             return NORMAL_FLAG
         }
     }
+
+    //提供一个接口给外部，用于设置foot文本
+    interface SetFootViewText{
+        fun loadComplete(): String
+        fun loading(): String
+    }
 }
 ```
 
 activity简要代码如下
 ```java
-class HomeFragment: BaseFragment(), RvOnItemClickListener {
+class HomeFragment: BaseFragment(), RvListener.OnItemClickListener, HomeRvAdapter.SetFootViewText {
 
     private val mutableList = mutableListOf<String>()
     private lateinit var adapter: HomeRvAdapter
+    private val handler = HomeHandler(this)
 
     override fun setLayout(): Int = R.layout.fragment_home
 
@@ -90,9 +99,11 @@ class HomeFragment: BaseFragment(), RvOnItemClickListener {
         home_rv.layoutManager = LinearLayoutManager(context)
         mutableList.add("顶部不显示")
         create()
-        adapter = HomeRvAdapter(context!!, mutableList)
+        adapter = HomeRvAdapter(context!!, mutableList, this)
         adapter.setItemClickListener(this)
         home_rv.adapter = adapter
+        home_rv.addOnScrollListener(object: RecyclerView.OnScrollListener(){
+        })
     }
 
     private fun create(){
@@ -101,10 +112,32 @@ class HomeFragment: BaseFragment(), RvOnItemClickListener {
         }
     }
 
+    class HomeHandler constructor(fragment: HomeFragment) :
+        UIHandler<HomeFragment>(fragment) {
+
+        override fun handleMessage(msg: Message) {
+            super.handleMessage(msg)
+            val fragment = get()
+            if (msg.what == Config.SUCCESS){
+            } else if (msg.what == Config.FAIL){
+            }
+        }
+    }
+
     override fun onItemClick(position: Int) {
         LogUtils.i("position = $position")
-        create()
-        adapter.notifyDataSetChanged()
+        handler.postDelayed({
+            create()
+            adapter.notifyDataSetChanged()
+        }, 1000)
     }
+
+    interface LoadMoreCompleteListener{
+        fun loadMoreComplete(holder: HomeRvAdapter.FootHolder)
+    }
+
+    override fun loadComplete(): String = "点击加载更多"
+
+    override fun loading(): String = "加载中..."
 }
 ```
