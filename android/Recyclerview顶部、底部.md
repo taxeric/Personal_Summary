@@ -137,4 +137,5 @@ class HomeFragment: BaseFragment(), RvListener.OnItemClickListener, HomeRvAdapte
     override fun loading(): String = "加载中..."
 }
 ```
-
+## 问题
+实际编写时发现一个问题：假设顶部为banner或者别的与正常显示列表数据不一致的item，当划走再划回来时会发现该item又被重新创建了
