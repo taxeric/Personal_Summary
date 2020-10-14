@@ -8,8 +8,7 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/app_bar_layout"
@@ -31,6 +30,33 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
+```
+
+ScrollRvBehavior
+```java
+class ScrollRvBehavior constructor(
+    context: Context,
+    attributeSet: AttributeSet
+): CoordinatorLayout.Behavior<RecyclerView>(context, attributeSet) {
+
+    override fun layoutDependsOn(
+        parent: CoordinatorLayout,
+        child: RecyclerView,
+        dependency: View
+    ): Boolean {
+        return dependency is AppBarLayout || super.layoutDependsOn(parent, child, dependency)
+    }
+
+    override fun onDependentViewChanged(
+        parent: CoordinatorLayout,
+        child: RecyclerView,
+        dependency: View
+    ): Boolean {
+        val offset = dependency.bottom - child.top
+        child.translationY = offset.toFloat()
+        return false
+    }
+}
 ```
 
 其他的等想到再写吧
