@@ -28,3 +28,5 @@ LogUtils.i("filePath ${path?.toString()}")
 输出
 filePath /storage/emulated/0/Android/data/com.eric.wanandroid/cache
 ```
+
+除了`getObbDir()`方法外，其余方法如果文件夹不存在则自动创建
