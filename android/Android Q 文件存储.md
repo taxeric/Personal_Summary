@@ -2,7 +2,6 @@
 ```java
 /storage/emulated/0/Android/data/com.xxx.xxx/xxxx
 ```
-||||
 |--|--|--|
 |私有目录名字|方法s|方法|
 |Media|getExternalMediaDirs()|无|
