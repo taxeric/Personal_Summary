@@ -29,4 +29,4 @@ LogUtils.i("filePath ${path?.toString()}")
 filePath /storage/emulated/0/Android/data/com.eric.wanandroid/cache
 ```
 
-除了`getObbDir()`方法外，其余方法如果文件夹不存在则自动创建
+除了`getObbDir()`方法外，其余方法如果文件夹不存在则自动创建；obb目录在/storage/emulated/0/Android/obb
