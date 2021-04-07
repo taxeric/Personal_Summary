@@ -45,7 +45,7 @@ class AIDLService: Service() {
     }
 }
 ```
-写ServiceConnectijon
+写ServiceConnection
 ```java
 class AIDLServiceConnection: ServiceConnection {
 
