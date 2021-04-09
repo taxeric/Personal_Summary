@@ -1,6 +1,6 @@
 需要```android sdk```，具体为```systrace-systrace.py```文件
 ## 记录trace文件
-**must**  
+*must!重要*
 需要python环境，2.x
 命令行
 ```java
