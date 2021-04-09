@@ -8,7 +8,7 @@ python systrace.py -o mmTrace.html -t 10
 ```
 参数：  
 - o：名字
-- t: 记录时长，单位秒  
+- t：记录时长，单位秒  
 会默认保存在systrace目录下
 ## 查看trace文件
 1. 谷歌浏览器，输入chrome://tracing/  导入文件
