@@ -8,8 +8,8 @@ python systrace.py -o mmTrace.html -t 10
 ```
 参数：  
 - o：名字
-- t：记录时长，单位秒  
-- 更多命令查看[文档](https://developer.android.google.cn/topic/performance/tracing/command-line)
+- t：记录时长，单位秒
+- 更多命令查看[文档](https://developer.android.google.cn/topic/performance/tracing/command-line)  
 会默认保存在systrace目录下
 ## 查看trace文件
 1. 谷歌浏览器，输入chrome://tracing/  导入文件
