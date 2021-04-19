@@ -4,7 +4,7 @@
 $ adb shell ps | findstr 包名
 这里的findstr是因为grep未找到
 ```
-输出指定级别log
+输出指定级别log（未指定进程，故输出指定级别的全部日志）
 ```
 $ adb logcat *:E
 E可替换成V、I等
