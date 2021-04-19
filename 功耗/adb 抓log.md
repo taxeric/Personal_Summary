@@ -1,4 +1,4 @@
-## 以下`findstr`可替换为`grep`，若后者提示`xxx不是内部或外部命令`可以用前者
+## 以下`findstr`可替换为`grep`，若后者提示`不是内部或外部命令`可以用前者
 找指定进程pid
 ```
 $ adb shell ps | findstr 包名
