@@ -15,7 +15,7 @@
 **QFIL用来刷工厂版本，没有MIUI框架，MiFlash用来刷小米系统**  
 **需要提前准备好文件**  
 
-**MIUI版本目录：共享文件夹/path/miui/xxxxx**
+**MIUI版本目录：共享文件夹/path/miui/xxxxx**  
 **工厂版本目录：共享文件夹/path/daily/xxxxx**
 
 0. 若没拔黄色胶布连的电源先拔了
