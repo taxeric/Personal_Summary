@@ -78,7 +78,7 @@ val user = User().apply{
 适合`let`的任何场景，与其不同的是会返回对象本身而不是最后一行值
 
 ```kotlin
-val i = "abc"?.let{
+val i = "abc"?.also{
     println(it)
     it.length
 }
