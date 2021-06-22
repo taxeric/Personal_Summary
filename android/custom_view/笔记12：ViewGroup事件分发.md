@@ -82,7 +82,7 @@ dispatchTouchEvent：
                 // We are looking up the accessibility focused host to avoid keeping
                 // state since these events are very rare.
                 
-                // init辅助功能
+                // init辅助功能（无障碍）
                 View childWithAccessibilityFocus = ev.isTargetAccessibilityFocus()
                         ? findChildWithAccessibilityFocus() : null;
 
@@ -102,7 +102,7 @@ dispatchTouchEvent：
                     final int childrenCount = mChildrenCount;
                     if (newTouchTarget == null && childrenCount != 0) {
                     
-                    // 获取触摸点位置
+                        // 获取触摸点位置
                         final float x =
                                 isMouseEvent ? ev.getXCursorPosition() : ev.getX(actionIndex);
                         final float y =
@@ -114,6 +114,7 @@ dispatchTouchEvent：
                                 && isChildrenDrawingOrderEnabled();
                         final View[] children = mChildren;
                         for (int i = childrenCount - 1; i >= 0; i--) {
+                            //获取索引
                             final int childIndex = getAndVerifyPreorderedIndex(
                                     childrenCount, i, customOrder);
                             final View child = getAndVerifyPreorderedView(
@@ -123,6 +124,7 @@ dispatchTouchEvent：
                                 continue;
                             }
 
+                            // 当newTouchTarget=null时表示child未获取到触摸事件
                             newTouchTarget = getTouchTarget(child);
                             if (newTouchTarget != null) {
                                 // Child is already receiving touch within its bounds.
@@ -131,7 +133,9 @@ dispatchTouchEvent：
                                 break;
                             }
 
+                            // 检查child是否设置了暂时不接收事件的标志位，如果设置了，则先清除
                             resetCancelNextUpFlag(child);
+                            // 把事件传递给View。当这个判断返回true时表示子View已经消费了事件
                             if (dispatchTransformedTouchEvent(ev, false, child, idBitsToAssign)) {
                                 // Child wants to receive touch within its bounds.
                                 mLastTouchDownTime = ev.getDownTime();
@@ -171,4 +175,5 @@ dispatchTouchEvent：
                     }
                 }
             }
+            ...
 ```
