@@ -1,5 +1,12 @@
 ## Kotlin快速上手：内联函数let、with、run、apply、also
 
+## 结论先行
+1. `apply`和`also`返回上下文对象
+2. `let`、`run`、`with`返回`lambda`结果
+3. `let`、`run`引用对象是`it`,其他的是`this`
+4. 如果是对对象配置,用`apply`，额外的处理用`also`
+5. `let`和`with`,如果是可空对象,用`let`方便,非空对象用`with`
+
 ### let
 
 常用场景：
