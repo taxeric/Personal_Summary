@@ -66,3 +66,70 @@ fun launchx3(
 output
 taxeric
 ```
+
+eg4
+```kotlin
+fun main() {
+    launchx3("taxeric", {
+        println(this)
+        566
+    })
+}
+
+fun launchx3(
+    str: String,
+	block: String.() -> Int
+){
+    println(str.block() + 1)
+}
+
+output
+taxeric
+567
+```
+
+eg
+```kotlin
+fun main() {
+    launchx4("taxeric"){
+        println(it)
+    }
+}
+
+fun launchx4(
+    str: String,
+	block: (String) -> Unit
+){
+    block(str)
+}
+
+output
+taxeric
+```
+
+eg
+```kotlin
+data class Tx(val str: String = "")
+fun main() {
+    launchx5({
+        "niu bi"
+    }, {
+        Tx(str = this)
+    })
+}
+
+fun <T> launchx5(
+    str: () -> String,
+	block: String.() -> T
+){
+    val value = str().block()
+    if (value is String){
+        println("the value's type is String. -> $value")
+    } else {
+        println("no str. -> ${value.toString()}")
+    }
+}
+
+output
+no str. -> Tx(str=niu bi)
+```
