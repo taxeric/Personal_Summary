@@ -5,3 +5,64 @@
 4. (T) -> Unit与 () -> Unit只是一个普通的函数，一个带有参数，类型为T，另一个没有参数，前者在函数体里用it访问
 5. T.() -> Unit相当于扩展函数，在函数体内表示T对象，用this访问，而() -> Unit只传入函数，this表示当前类对象上下文
 
+eg1
+```kotlin
+fun main() {
+    launchx({
+        "1  ->  haha"
+    })
+}
+
+fun launchx(
+	block: () -> String
+){
+    println(block())
+}
+
+output
+1  ->  haha
+```
+eg2
+```kotlin
+fun main() {
+    launchx2<String>({
+        "2  ->  tax"
+    })
+    launchx2<Int>({
+        999
+    })
+}
+
+fun <T> launchx2(
+	block: () -> T
+){
+    if (block() is String){
+        println(block())
+    } else {
+        println("no str")
+    }
+}
+
+output
+2  ->  tax
+no str
+```
+
+eg3
+```kotlin
+fun main(){
+    launchx3("taxeric", {
+        println(this)
+    })
+}
+
+fun launchx3(
+    str: String,
+	block: String.() -> Unit
+){
+    block(str)
+}
+
+output
+taxeric
+```
