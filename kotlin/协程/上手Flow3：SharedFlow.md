@@ -129,5 +129,13 @@ public fun <T> MutableSharedFlow(
     return SharedFlowImpl(replay, bufferCapacity, onBufferOverflow)
 }
 ```
-从构造方法可以看出，缓冲区大小0 = 可返回的旧值数量 + 额外的缓冲区大小，若缓冲区大小0 < 0，则最终实现的缓冲区大小为Int.MAX_VALUE
+从构造方法可以看出，缓冲区大小0 = 可返回的旧值数量 + 额外的缓冲区大小，若缓冲区大小0 < 0，则最终实现的缓冲区大小为Int.MAX_VALUE  
+
+发射数据有两种方式：emit和tryEmit。当`MutableSharedFlow`中缓存数据量超过阈值时，`emit`方法和`tryEmit`方法的处理方式会有不同：  
+
+- emit：当缓存策略为 BufferOverflow.SUSPEND 时，emit 方法会挂起，直到有新的缓存空间。
+- tryEmit：tryEmit 会返回一个 Boolean 值，true 代表传递成功，false 代表会产生一个回调，让这次数据发射挂起，直到有新的缓存空间。
+
+作者：九心
+链接：https://juejin.cn/post/6937138168474894343
 
