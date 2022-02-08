@@ -1,7 +1,8 @@
 热流之一，始终处于活跃状态且发射的值处于内存中，只有垃圾回收根未涉及其他引用才被回收，需要指定初始值。（安卓开发中StateFlow与LiveData作用基本一致）  
 ## 结论
 - StateFlow只会把最新值emit给订阅者，与订阅者数量无关
-- StateFlow需要提供初始值  
+- StateFlow需要提供初始值
+- StateFlow实现`MutableSharedFlow<T>`接口，故可以使用`emit`方法发射数据。也可以使用setValue()
 
 ```kotlin
 class StateFlowTest {
