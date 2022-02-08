@@ -60,7 +60,7 @@ job2 collect -> 39
 -----------------------------
 ```
 ## MutableSharedFlow可选构造参数
-- replay：当有新的订阅者时返回几个旧数据给他，返回数量为replay - 1，即replay = 3时返回两个旧数据。修改如下
+- replay：当有新的订阅者时返回几个旧数据给他，返回数量为replay - 1，即replay = 3时返回两个旧数据（2条旧数据 + 1条最近数据 = 3条数据）。修改如下
 ```kotlin
 class SharedFlowTest {
 
