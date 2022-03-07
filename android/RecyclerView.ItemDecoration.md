@@ -194,4 +194,119 @@ height(dp) => height(px) = mDivider.getIntrinsicHeight(px) = outRect.bottom
 md，写不下去了，看看别人怎么写的
 https://www.wecando.cc/article/9
 
+## 自定义分割线
+由官方修改而来，当指定为`HORIZONTAL`时，左右滑动最后的分割条不显示；当指定为`VERTICAL`，上下滑动最后的分割条不显示
+```kotlin
+    private class ItemDivider(orientation: Int = LinearLayout.HORIZONTAL): RecyclerView.ItemDecoration(){
+        companion object{
+            const val HORIZONTAL = LinearLayout.HORIZONTAL
+            const val VERTICAL = LinearLayout.VERTICAL
+        }
+
+        private var mDivider: Drawable? = null
+
+        private var mOrientation = 0
+
+        private val mBounds = Rect()
+
+        init {
+            mOrientation = orientation
+        }
+
+        fun setDrawable(mDivider: Drawable){
+            this.mDivider = mDivider
+        }
+
+        override fun onDraw(c: Canvas, parent: RecyclerView, state: RecyclerView.State) {
+            super.onDraw(c, parent, state)
+            if (mOrientation == VERTICAL) {
+                drawVertical(c, parent)
+            } else {
+                drawHorizontal(c, parent)
+            }
+        }
+
+        private fun drawVertical(canvas: Canvas, parent: RecyclerView) {
+            canvas.save()
+            val left: Int
+            val right: Int
+            if (parent.clipToPadding) {
+                left = parent.paddingLeft
+                right = parent.width - parent.paddingRight
+                canvas.clipRect(
+                    left, parent.paddingTop, right,
+                    parent.height - parent.paddingBottom
+                )
+            } else {
+                left = 0
+                right = parent.width
+            }
+            val childCount = parent.childCount
+            for (i in 0 until childCount) {
+                val child = parent.getChildAt(i)
+                parent.getDecoratedBoundsWithMargins(child, mBounds)
+                val bottom = mBounds.bottom + child.translationY.roundToInt()
+                val top = bottom - mDivider!!.intrinsicHeight
+                mDivider!!.setBounds(left, top, right, bottom)
+                mDivider!!.draw(canvas)
+            }
+            canvas.restore()
+        }
+
+        private fun drawHorizontal(canvas: Canvas, parent: RecyclerView) {
+            canvas.save()
+            val top: Int
+            val bottom: Int
+            if (parent.clipToPadding) {
+                top = parent.paddingTop
+                bottom = parent.height - parent.paddingBottom
+                canvas.clipRect(
+                    parent.paddingLeft, top,
+                    parent.width - parent.paddingRight, bottom
+                )
+            } else {
+                top = 0
+                bottom = parent.height
+            }
+            val childCount = parent.childCount
+            for (i in 0 until childCount) {
+                val child = parent.getChildAt(i)
+                parent.layoutManager!!.getDecoratedBoundsWithMargins(child, mBounds)
+                val right = mBounds.right + child.translationX.roundToInt()
+                val left = right - mDivider!!.intrinsicWidth
+                mDivider!!.setBounds(left, top, right, bottom)
+                mDivider!!.draw(canvas)
+            }
+            canvas.restore()
+        }
+
+        override fun getItemOffsets(
+            outRect: Rect,
+            view: View,
+            parent: RecyclerView,
+            state: RecyclerView.State
+        ) {
+            if (mDivider == null) {
+                outRect[0, 0, 0] = 0
+                return
+            }
+            val childAdapterPosition = parent.getChildAdapterPosition(view)
+            val lastCount = parent.adapter!!.itemCount - 1
+            if (mOrientation == VERTICAL) {
+                if (childAdapterPosition != lastCount) {
+                    outRect[0, 0, 0] = mDivider!!.intrinsicHeight
+                } else {
+                    outRect[0, 0, 0] = 0
+                }
+            } else {
+                if (childAdapterPosition != lastCount) {
+                    outRect[0, 0, mDivider!!.intrinsicWidth] = 0
+                } else {
+                    outRect[0, 0, 0] = 0
+                }
+            }
+        }
+    }
+```
+
 OK，这篇就到这里
