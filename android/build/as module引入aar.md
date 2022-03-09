@@ -1,4 +1,4 @@
-## 北极狐,熊峰及以下版本
+## 北极狐,熊峰以下版本
 1. module层的libs加入aar
 2. project层的build.gradle的`allprojects - repositories`编写如下代码
 ```kotlin
