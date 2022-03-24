@@ -236,3 +236,4 @@ inline fun test(i: Int, crossinline method: () -> Unit){
       method.invoke();
    }
 ```
+该关键字需要在`inline`修饰的方法中使用
